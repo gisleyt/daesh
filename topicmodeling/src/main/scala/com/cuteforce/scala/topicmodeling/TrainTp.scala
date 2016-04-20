@@ -31,7 +31,7 @@ object TrainTp {
     val conf = new SparkConf().setAppName("TopicModeling") //.setMaster("local[4]")
     val sc = new SparkContext(conf)
 
-    val rddCorpus = sc.makeRDD(corpus).repartition(corpus.length / 100).cache()
+    val rddCorpus = sc.makeRDD(corpus).repartition(20).cache()
     val numberOfTopics = if (args.length > 1) args(1).toInt else 10
     val maxIterations = if (args.length > 2) args(2).toInt else 50
 
@@ -41,8 +41,10 @@ object TrainTp {
       .setMaxIterations(maxIterations)
       .run(rddCorpus)
 
+    sc.broadcast(titleIdMap)
     // val reverseDict = (Map() ++ dictionary.map(_.swap))
     val distModel = ldaModel.asInstanceOf[DistributedLDAModel]
+    // ldaModel.save(sc, if (args.length > 4) args(4) else "/tmp/tp.model")
     val topSimilarDocument = TopicModellingUtils.top10SimilarDocument(distModel, numberOfTopics, titleIdMap)
 
     val outputFile = new File(if (args.length > 3) args(3) else "/tmp/tp.txt")
