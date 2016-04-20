@@ -36,9 +36,8 @@ object TopicModellingUtils {
         .map { case (otherTopic, otherTopicVector) =>
           (topic, otherTopic, Math.sqrt(getDistance(topicVector, otherTopicVector)))
         }
-        .collect()
         .sortBy(x => x._3)
-        .slice(0, 10)
+        .takeOrdered(10)
     }
   }
 
